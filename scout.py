@@ -101,7 +101,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
         (ctx.text_extents(s).width / 1) + extra_shift_major + CARD_WIDTH*xi
     ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 6)
-    line_width = 1.6
+    line_width = 1.3
   else:
     color = NUMBER_COLORS[int(s, 16)]
     font_size = MINOR_FONT_SIZE
@@ -111,7 +111,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
         (ctx.text_extents(s).width / 1.5) + CARD_WIDTH*xi - extra_shift_minor
     ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) -
               MAJOR_FONT_SIZE - BOX_RADIUS - adj)
-    line_width = 1.3
+    line_width = 1
 
   ctx.move_to(xm, ym)
   ctx.text_path(s)
