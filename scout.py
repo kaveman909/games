@@ -19,6 +19,7 @@ def ppi(inches):
 def nrgb(raw: int):
   return float(raw) / 255
 
+svg = False
 
 CARD_WIDTH = ppi(2.5)
 CARD_HEIGHT = ppi(3.5)
@@ -182,9 +183,10 @@ file_idx = 0
 for left, right in itertools.combinations(range(0, 10), 2):
 
   if (xi == 0 and yi == 0):
-    # surface = cairo.SVGSurface('Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
-    surface = cairo.PDFSurface(
-        'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+    if svg:
+      surface = cairo.SVGSurface('Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+    else:
+      surface = cairo.PDFSurface('Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
     file_idx += 1
     ctx = cairo.Context(surface)
     draw_cuts(ctx)
