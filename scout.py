@@ -1,7 +1,7 @@
 #!/opt/homebrew/bin/python3
 
 import itertools
-from math import pi
+from math import pi, floor
 import cairo
 
 
@@ -27,7 +27,7 @@ def nrgb(raw: int):
 CARD_WIDTH = ppi(2.5)
 CARD_HEIGHT = ppi(3.5)
 
-CARD_OUTLINE_WIDTH = 0
+CARD_OUTLINE_WIDTH = 4
 
 PAPER_WIDTH = ppi(11)
 PAPER_HEIGHT = ppi(8.5)
@@ -35,6 +35,8 @@ PAPER_HEIGHT = ppi(8.5)
 MARGIN_WIDTH = ppi(0.5)
 MARGIN_HEIGHT = ppi(0.5)
 
+MAX_COLS = floor((PAPER_WIDTH - MARGIN_WIDTH*2)/CARD_WIDTH)
+MAX_ROWS = floor((PAPER_HEIGHT - MARGIN_HEIGHT*2)/CARD_HEIGHT)
 
 MAJOR_FONT_SIZE = 54
 MAJOR_EXTRA_SHIFT = 10
@@ -53,13 +55,13 @@ def yinv(yin: int):
 
 MAIN_TEXT_COLOR = Color(5, 45, 74)
 BOX_COLOR = Color(5, 26, 52)
-OUTLINE_COLOR = Color(255, 247, 211)
+OUTLINE_COLOR = Color(255, 255, 255)
 NUMBER_COLORS = [Color(77, 103, 190),
                  Color(0, 142, 226),
                  Color(0, 195, 243),
                  Color(0, 172, 178),
                  Color(67, 222, 98),
-                 Color(197,247,72),
+                 Color(197, 247, 72),
                  Color(254, 236, 4),
                  Color(255, 190, 30),
                  Color(244, 117, 1),
@@ -102,7 +104,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     ctx.set_font_size(font_size)
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
         (ctx.text_extents(s).width / 1) + extra_shift_major + CARD_WIDTH*xi
-    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 8)
+    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 6)
     line_width = 1.6
   else:
     color = NUMBER_COLORS[int(s, 16)]
@@ -145,10 +147,34 @@ def draw_outline(ctx: cairo.Context, xi: int, yi: int):
   ctx.set_source_rgba(OUTLINE_COLOR.r, OUTLINE_COLOR.g, OUTLINE_COLOR.b)
   ctx.set_line_width(CARD_OUTLINE_WIDTH)
 
-  ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi, yinv(
-      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1)), CARD_WIDTH, CARD_HEIGHT)
+  ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi + CARD_OUTLINE_WIDTH/2, yinv(
+      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2), CARD_WIDTH - CARD_OUTLINE_WIDTH/2, CARD_HEIGHT - CARD_OUTLINE_WIDTH/2)
 
-  ctx.set_line_join(cairo.LineJoin.BEVEL)
+  ctx.set_line_join(cairo.LineJoin.MITER)
+  ctx.stroke()
+
+def draw_cuts(ctx: cairo.Context):
+  ctx.set_source_rgba(0, 0, 0)
+  ctx.set_line_width(1)
+
+  for i in range(MAX_ROWS + 1):
+    # Left side
+    ctx.move_to(0, yinv(MARGIN_HEIGHT + CARD_HEIGHT*i))
+    ctx.rel_line_to(MARGIN_WIDTH/1.5, 0)
+
+    # Right side
+    ctx.move_to(PAPER_WIDTH, yinv(MARGIN_HEIGHT + CARD_HEIGHT*i))
+    ctx.rel_line_to(-MARGIN_WIDTH/1.5, 0)
+
+  for i in range(MAX_COLS + 1):
+    # Bottom side
+    ctx.move_to(MARGIN_WIDTH + CARD_WIDTH*i, yinv(0))
+    ctx.rel_line_to(0, -MARGIN_HEIGHT/1.5)
+
+    # Top side
+    ctx.move_to(MARGIN_WIDTH + CARD_WIDTH*i, 0)
+    ctx.rel_line_to(0, MARGIN_HEIGHT/1.5)
+
   ctx.stroke()
 
 # main script
@@ -159,14 +185,14 @@ for left, right in itertools.combinations(range(0, 10), 2):
 
   if (xi == 0 and yi == 0):
     # surface = cairo.SVGSurface('Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
-    surface = cairo.PDFSurface('Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+    surface = cairo.PDFSurface(
+        'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
     file_idx += 1
     ctx = cairo.Context(surface)
+    draw_cuts(ctx)
 
   lefts = hex(left)[2:].upper()
   rights = hex(right)[2:].upper()
-
-  draw_outline(ctx, xi, yi)
 
   # Left side of card
   triangle(ctx, xi, yi, NUMBER_COLORS[left])
@@ -184,9 +210,11 @@ for left, right in itertools.combinations(range(0, 10), 2):
 
   rot_card(ctx, xi, yi)
 
-  if xi < 3:
+  draw_outline(ctx, xi, yi)
+
+  if xi < (MAX_COLS - 1):
     xi += 1
-  elif yi < 1:
+  elif yi < (MAX_ROWS - 1):
     xi = 0
     yi += 1
   else:
