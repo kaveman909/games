@@ -3,8 +3,9 @@
 import itertools
 from math import pi, floor
 import cairo
-
-
+from PyPDF2 import PdfFileMerger, PdfFileReader
+import os
+ 
 class Color:
   def __init__(self, r, g, b):
     self.r = nrgb(r)
@@ -220,3 +221,12 @@ for left, right in itertools.combinations(range(0, 10), 2):
   else:
     xi = 0
     yi = 0
+
+surface.finish()
+
+# Finally, combine pages of PDF into one
+combined = PdfFileMerger()
+for i in range(0, file_idx):
+    combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
+    os.remove('Scout-{}.pdf'.format(i))
+combined.write("Scout.pdf")
