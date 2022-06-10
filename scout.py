@@ -147,11 +147,12 @@ def draw_outline(ctx: cairo.Context, xi: int, yi: int):
   ctx.set_source_rgba(OUTLINE_COLOR.r, OUTLINE_COLOR.g, OUTLINE_COLOR.b)
   ctx.set_line_width(CARD_OUTLINE_WIDTH)
 
-  ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi + CARD_OUTLINE_WIDTH/2, yinv(
-      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2), CARD_WIDTH - CARD_OUTLINE_WIDTH/2, CARD_HEIGHT - CARD_OUTLINE_WIDTH/2)
+  ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi + CARD_OUTLINE_WIDTH/2 - 1, yinv(
+      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2 + 1), CARD_WIDTH - CARD_OUTLINE_WIDTH/2 + 1, CARD_HEIGHT - CARD_OUTLINE_WIDTH/2 + 1)
 
   ctx.set_line_join(cairo.LineJoin.MITER)
   ctx.stroke()
+
 
 def draw_cuts(ctx: cairo.Context):
   ctx.set_source_rgba(0, 0, 0)
@@ -176,6 +177,7 @@ def draw_cuts(ctx: cairo.Context):
     ctx.rel_line_to(0, MARGIN_HEIGHT/1.5)
 
   ctx.stroke()
+
 
 # main script
 xi = 0
