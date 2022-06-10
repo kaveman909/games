@@ -16,10 +16,6 @@ def ppi(inches):
   return int(inches * 72)
 
 
-def num_to_index(num):
-  return num + 20
-
-
 def nrgb(raw: int):
   return float(raw) / 255
 
@@ -193,8 +189,8 @@ for left, right in itertools.combinations(range(0, 10), 2):
     ctx = cairo.Context(surface)
     draw_cuts(ctx)
 
-  lefts = hex(left)[2:].upper()
-  rights = hex(right)[2:].upper()
+  lefts = str(left)
+  rights = str(right)
 
   # Left side of card
   triangle(ctx, xi, yi, NUMBER_COLORS[left])
