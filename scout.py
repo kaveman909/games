@@ -36,14 +36,14 @@ MARGIN_HEIGHT = ppi(0.5)
 MAX_COLS = floor((PAPER_WIDTH - MARGIN_WIDTH*2)/CARD_WIDTH)
 MAX_ROWS = floor((PAPER_HEIGHT - MARGIN_HEIGHT*2)/CARD_HEIGHT)
 
-MAJOR_FONT_SIZE = 54
-MAJOR_EXTRA_SHIFT = 10
+MAJOR_FONT_SIZE = 50
+MAJOR_EXTRA_SHIFT = 12
 MINOR_EXTRA_SHIFT = 5
 
-MINOR_FONT_SIZE = 27
+MINOR_FONT_SIZE = 25
 
+BOX_EXTRA_MARGIN = 18
 BOX_RADIUS = (MINOR_FONT_SIZE + 10) / 2
-BOX_EXTRA_MARGIN = 10
 BOX_TOTAL_WIDTH = BOX_RADIUS * 2 + BOX_EXTRA_MARGIN
 
 
@@ -87,11 +87,11 @@ def triangle(ctx: cairo.Context, xi: int, yi: int, color: Color, alpha=1):
 
 
 def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
-  ctx.select_font_face("sans-serif", cairo.FONT_SLANT_NORMAL,
+  ctx.select_font_face("futura", cairo.FONT_SLANT_NORMAL,
                        cairo.FONT_WEIGHT_BOLD)
 
   if s == '1':
-    extra_shift_major = 0
+    extra_shift_major = -3
     extra_shift_minor = MINOR_EXTRA_SHIFT
   else:
     extra_shift_major = MAJOR_EXTRA_SHIFT
@@ -101,19 +101,19 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     font_size = MAJOR_FONT_SIZE
     ctx.set_font_size(font_size)
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
-        (ctx.text_extents(s).width / 1) + extra_shift_major + CARD_WIDTH*xi
-    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 6)
-    line_width = 1.3
+        (ctx.text_extents(s).width / 1.1) + extra_shift_major + CARD_WIDTH*xi
+    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 0)
+    line_width = 1
   else:
     color = NUMBER_COLORS[int(s, 16)]
     font_size = MINOR_FONT_SIZE
     ctx.set_font_size(font_size)
     adj = BOX_RADIUS - (2*BOX_RADIUS - ctx.text_extents(s).height) / 2
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
-        (ctx.text_extents(s).width / 1.5) + CARD_WIDTH*xi - extra_shift_minor
+        (ctx.text_extents(s).width / 1.8) + CARD_WIDTH*xi - extra_shift_minor
     ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) -
-              MAJOR_FONT_SIZE - BOX_RADIUS - adj)
-    line_width = 1
+              MAJOR_FONT_SIZE - BOX_RADIUS - adj - 5)
+    line_width = 0.8
 
   ctx.move_to(xm, ym)
   ctx.text_path(s)
@@ -132,7 +132,7 @@ def draw_box(ctx: cairo.Context, xi: int, yi: int):
   ctx.set_source_rgba(BOX_COLOR.r, BOX_COLOR.g, BOX_COLOR.b)
   ctx.set_line_width(0)
   ctx.arc(MARGIN_WIDTH + BOX_RADIUS + BOX_EXTRA_MARGIN + CARD_WIDTH*xi, yinv(MARGIN_HEIGHT +
-          CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS), BOX_RADIUS, 3*pi/2, pi/2)
+          CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS - 6), BOX_RADIUS, 3*pi/2, pi/2)
   ctx.rel_line_to(-BOX_RADIUS - BOX_EXTRA_MARGIN, 0)
   ctx.rel_line_to(0, -BOX_RADIUS*2)
   ctx.close_path()
