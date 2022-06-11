@@ -22,6 +22,9 @@ def nrgb(raw: int):
 
 svg = False
 
+FONT = "gill sans"
+# FONT = "helvetica neue"
+
 CARD_WIDTH = ppi(2.5)
 CARD_HEIGHT = ppi(3.5)
 
@@ -37,7 +40,7 @@ MAX_COLS = floor((PAPER_WIDTH - MARGIN_WIDTH*2)/CARD_WIDTH)
 MAX_ROWS = floor((PAPER_HEIGHT - MARGIN_HEIGHT*2)/CARD_HEIGHT)
 
 MAJOR_FONT_SIZE = 50
-MAJOR_EXTRA_SHIFT = 12
+MAJOR_EXTRA_SHIFT = 10
 MINOR_EXTRA_SHIFT = 5
 
 MINOR_FONT_SIZE = 25
@@ -87,11 +90,11 @@ def triangle(ctx: cairo.Context, xi: int, yi: int, color: Color, alpha=1):
 
 
 def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
-  ctx.select_font_face("futura", cairo.FONT_SLANT_NORMAL,
+  ctx.select_font_face(FONT, cairo.FONT_SLANT_NORMAL,
                        cairo.FONT_WEIGHT_BOLD)
 
   if s == '1':
-    extra_shift_major = -3
+    extra_shift_major = -7
     extra_shift_minor = MINOR_EXTRA_SHIFT
   else:
     extra_shift_major = MAJOR_EXTRA_SHIFT
