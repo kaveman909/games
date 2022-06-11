@@ -40,12 +40,12 @@ MAX_COLS = floor((PAPER_WIDTH - MARGIN_WIDTH*2)/CARD_WIDTH)
 MAX_ROWS = floor((PAPER_HEIGHT - MARGIN_HEIGHT*2)/CARD_HEIGHT)
 
 MAJOR_FONT_SIZE = 50
-MAJOR_EXTRA_SHIFT = 10
+MAJOR_EXTRA_SHIFT = 8
 MINOR_EXTRA_SHIFT = 5
 
 MINOR_FONT_SIZE = 25
 
-BOX_EXTRA_MARGIN = 18
+BOX_EXTRA_MARGIN = 12
 BOX_RADIUS = (MINOR_FONT_SIZE + 10) / 2
 BOX_TOTAL_WIDTH = BOX_RADIUS * 2 + BOX_EXTRA_MARGIN
 
@@ -105,7 +105,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     ctx.set_font_size(font_size)
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
         (ctx.text_extents(s).width / 1.1) + extra_shift_major + CARD_WIDTH*xi
-    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 0)
+    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 3)
     line_width = 1
   else:
     color = NUMBER_COLORS[int(s, 16)]
