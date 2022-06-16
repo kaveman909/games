@@ -238,6 +238,8 @@ if __name__ == '__main__':
       if svg:
         surface = cairo.SVGSurface(
             'Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+        surface_back = cairo.SVGSurface(
+            'Scout-Back{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
       else:
         surface = cairo.PDFSurface(
             'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
@@ -293,11 +295,12 @@ if __name__ == '__main__':
   surface.finish()
   surface_back.finish()
 
-  # Finally, combine pages of PDF into one
-  combined = PdfFileMerger()
-  for i in range(0, file_idx):
-    combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
-    os.remove('Scout-{}.pdf'.format(i))
-    combined.append(PdfFileReader('Scout-Back{}.pdf'.format(i), 'rb'))
-    os.remove('Scout-Back{}.pdf'.format(i))
-  combined.write("Scout.pdf")
+  if not svg:
+    # Finally, combine pages of PDF into one
+    combined = PdfFileMerger()
+    for i in range(0, file_idx):
+      combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
+      os.remove('Scout-{}.pdf'.format(i))
+      combined.append(PdfFileReader('Scout-Back{}.pdf'.format(i), 'rb'))
+      os.remove('Scout-Back{}.pdf'.format(i))
+    combined.write("Scout.pdf")
