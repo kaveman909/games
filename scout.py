@@ -30,14 +30,12 @@ def nrgb(raw: int):
 svg = False
 
 GAME_NAME = "Scout"
-
 FONT = "gill sans"
-# FONT = "helvetica neue"
 
 CARD_WIDTH = ppi(2.5)
 CARD_HEIGHT = ppi(3.5)
 
-CARD_OUTLINE_WIDTH = 4
+CARD_OUTLINE_WIDTH = 12
 
 PAPER_WIDTH = ppi(11)
 PAPER_HEIGHT = ppi(8.5)
@@ -55,9 +53,10 @@ MINOR_EXTRA_SHIFT = 6
 MINOR_FONT_SIZE = 25
 BACK_FONT_SIZE = 65
 
-BOX_EXTRA_MARGIN = 12
+BOX_EXTRA_MARGIN = 20
 BOX_RADIUS = (MINOR_FONT_SIZE + 10) / 2
 BOX_TOTAL_WIDTH = BOX_RADIUS * 2 + BOX_EXTRA_MARGIN
+BOX_EXTRA_Y = 14
 
 
 def yinv(yin: int):
@@ -83,6 +82,7 @@ CUTS_COLOR = Color(0, 0, 0)
 BACK_TRI_LEFT = Color(67, 0, 149)
 BACK_TRI_RIGHT = Color(240, 133, 1)
 BACK_FONT_COLOR = Color(241, 223, 1)
+BACK_LINE_WIDTH = 2
 
 
 def rot_card(ctx: cairo.Context, xi, yi, angle=pi, inv=False):
@@ -112,7 +112,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
                        cairo.FONT_WEIGHT_BOLD)
 
   if s == '1':
-    extra_shift_major = -7
+    extra_shift_major = -4
     extra_shift_minor = MINOR_EXTRA_SHIFT
   else:
     extra_shift_major = MAJOR_EXTRA_SHIFT
@@ -122,18 +122,18 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     font_size = MAJOR_FONT_SIZE
     ctx.set_font_size(font_size)
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
-        (ctx.text_extents(s).width / 1.1) + extra_shift_major + CARD_WIDTH*xi
-    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE + 3)
+        (ctx.text_extents(s).width / 1.5) + extra_shift_major + CARD_WIDTH*xi
+    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - 6)
     line_width = 1
   else:
     color = NUMBER_COLORS[int(s, 16)]
     font_size = MINOR_FONT_SIZE
     ctx.set_font_size(font_size)
     adj = BOX_RADIUS - (2*BOX_RADIUS - ctx.text_extents(s).height) / 2
-    xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
-        (ctx.text_extents(s).width / 1.8) + CARD_WIDTH*xi - extra_shift_minor
+    xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH) - 24 - \
+        (ctx.text_extents(s).width / 2) + CARD_WIDTH*xi - extra_shift_minor
     ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) -
-              MAJOR_FONT_SIZE - BOX_RADIUS - adj - 5)
+              MAJOR_FONT_SIZE - BOX_RADIUS - adj - BOX_EXTRA_Y)
     line_width = 0.8
 
   ctx.move_to(xm, ym)
@@ -151,6 +151,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
 
 def draw_back_text(ctx: cairo.Context, s: str, xi: int, yi: int):
 
+  ctx.save()
   ctx.select_font_face(FONT, cairo.FONT_SLANT_NORMAL,
                        cairo.FONT_WEIGHT_BOLD)
   ctx.set_font_size(BACK_FONT_SIZE)
@@ -166,21 +167,18 @@ def draw_back_text(ctx: cairo.Context, s: str, xi: int, yi: int):
   # set text fill color, fill in the text, preserve so we can draw the outline
   set_color(ctx, BACK_FONT_COLOR)
   ctx.fill_preserve()
-  # Draw thin white outline around text
-  ctx.set_line_width(2)
+  ctx.set_line_width(BACK_LINE_WIDTH)
   set_color(ctx, OUTLINE_COLOR)
 
   ctx.stroke()
-
-  ctx.rotate(-pi/2)
-  ctx.translate(-xshift, -yshift)
+  ctx.restore()
 
 
 def draw_box(ctx: cairo.Context, xi: int, yi: int):
   set_color(ctx, BOX_COLOR)
   ctx.set_line_width(0)
   ctx.arc(MARGIN_WIDTH + BOX_RADIUS + BOX_EXTRA_MARGIN + CARD_WIDTH*xi, yinv(MARGIN_HEIGHT +
-          CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS - 6), BOX_RADIUS, 3*pi/2, pi/2)
+          CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS - BOX_EXTRA_Y), BOX_RADIUS, 3*pi/2, pi/2)
   ctx.rel_line_to(-BOX_RADIUS - BOX_EXTRA_MARGIN, 0)
   ctx.rel_line_to(0, -BOX_RADIUS*2)
   ctx.close_path()
@@ -191,15 +189,15 @@ def draw_box(ctx: cairo.Context, xi: int, yi: int):
 
 def draw_outline(ctx: cairo.Context, xi: int, yi: int, fill=False):
 
+  ctx.set_line_width(CARD_OUTLINE_WIDTH)
+  set_color(ctx, OUTLINE_COLOR)
   ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi + CARD_OUTLINE_WIDTH/2 - 1, yinv(
-      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2 + 1), CARD_WIDTH - CARD_OUTLINE_WIDTH/2 + 1, CARD_HEIGHT - CARD_OUTLINE_WIDTH/2 + 1)
+      MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2 + 1), CARD_WIDTH - CARD_OUTLINE_WIDTH + 2, CARD_HEIGHT - CARD_OUTLINE_WIDTH + 2)
 
   if fill:
     set_color(ctx, CARD_BACK_COLOR)
     ctx.fill_preserve()
 
-  set_color(ctx, OUTLINE_COLOR)
-  ctx.set_line_width(CARD_OUTLINE_WIDTH)
   ctx.set_line_join(cairo.LineJoin.MITER)
   ctx.stroke()
 
@@ -255,12 +253,15 @@ for left, right in itertools.combinations(range(0, 10), 2):
   rights = str(right)
 
   # Back Side
-  triangle(ctx_back, xi, yi, BACK_TRI_LEFT)
-  rot_card(ctx_back, xi, yi)
-  triangle(ctx_back, xi, yi, BACK_TRI_RIGHT)
-  rot_card(ctx_back, xi, yi)
-  draw_outline(ctx_back, xi, yi)
-  draw_back_text(ctx_back, GAME_NAME, xi, yi)
+  # "Flip along short edge"
+  xback = xi
+  yback = MAX_ROWS - yi - 1
+  triangle(ctx_back, xback, yback, BACK_TRI_LEFT)
+  rot_card(ctx_back, xback, yback)
+  triangle(ctx_back, xback, yback, BACK_TRI_RIGHT)
+  rot_card(ctx_back, xback, yback)
+  draw_outline(ctx_back, xback, yback)
+  draw_back_text(ctx_back, GAME_NAME, xback, yback)
 
   # Front Left Side
   triangle(ctx, xi, yi, NUMBER_COLORS[left])
