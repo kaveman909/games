@@ -256,8 +256,8 @@ if __name__ == '__main__':
 
     # Back Side
     # "Flip along short edge"
-    xback = xi
-    yback = MAX_ROWS - yi - 1
+    xback = MAX_COLS - xi - 1
+    yback = yi
     triangle(ctx_back, xback, yback, BACK_TRI_LEFT)
     rot_card(ctx_back, xback, yback)
     triangle(ctx_back, xback, yback, BACK_TRI_RIGHT)
