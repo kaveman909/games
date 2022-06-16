@@ -227,77 +227,77 @@ def draw_cuts(ctx: cairo.Context):
   ctx.stroke()
 
 
-# main script
-xi = 0
-yi = 0
-file_idx = 0
+if __name__ == '__main__':
+  xi = 0
+  yi = 0
+  file_idx = 0
 
-for left, right in itertools.combinations(range(0, 10), 2):
+  for left, right in itertools.combinations(range(0, 10), 2):
 
-  if (xi == 0 and yi == 0):
-    if svg:
-      surface = cairo.SVGSurface(
-          'Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+    if (xi == 0 and yi == 0):
+      if svg:
+        surface = cairo.SVGSurface(
+            'Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+      else:
+        surface = cairo.PDFSurface(
+            'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+        surface_back = cairo.PDFSurface(
+            'Scout-Back{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+      file_idx += 1
+      ctx = cairo.Context(surface)
+      ctx_back = cairo.Context(surface_back)
+      draw_cuts(ctx)
+      draw_cuts(ctx_back)
+
+    lefts = str(left)
+    rights = str(right)
+
+    # Back Side
+    # "Flip along short edge"
+    xback = xi
+    yback = MAX_ROWS - yi - 1
+    triangle(ctx_back, xback, yback, BACK_TRI_LEFT)
+    rot_card(ctx_back, xback, yback)
+    triangle(ctx_back, xback, yback, BACK_TRI_RIGHT)
+    rot_card(ctx_back, xback, yback)
+    draw_outline(ctx_back, xback, yback)
+    draw_back_text(ctx_back, GAME_NAME, xback, yback)
+
+    # Front Left Side
+    triangle(ctx, xi, yi, NUMBER_COLORS[left])
+    draw_text(ctx, True, lefts, xi, yi)
+    draw_box(ctx, xi, yi)
+    draw_text(ctx, False, rights, xi, yi)
+
+    rot_card(ctx, xi, yi)
+
+    # Front Rigth Side
+    triangle(ctx, xi, yi, NUMBER_COLORS[right])
+    draw_text(ctx, True, rights, xi, yi)
+    draw_box(ctx, xi, yi)
+    draw_text(ctx, False, lefts, xi, yi)
+
+    rot_card(ctx, xi, yi)
+
+    draw_outline(ctx, xi, yi)
+
+    if xi < (MAX_COLS - 1):
+      xi += 1
+    elif yi < (MAX_ROWS - 1):
+      xi = 0
+      yi += 1
     else:
-      surface = cairo.PDFSurface(
-          'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
-      surface_back = cairo.PDFSurface(
-          'Scout-Back{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
-    file_idx += 1
-    ctx = cairo.Context(surface)
-    ctx_back = cairo.Context(surface_back)
-    draw_cuts(ctx)
-    draw_cuts(ctx_back)
+      xi = 0
+      yi = 0
 
-  lefts = str(left)
-  rights = str(right)
+  surface.finish()
+  surface_back.finish()
 
-  # Back Side
-  # "Flip along short edge"
-  xback = xi
-  yback = MAX_ROWS - yi - 1
-  triangle(ctx_back, xback, yback, BACK_TRI_LEFT)
-  rot_card(ctx_back, xback, yback)
-  triangle(ctx_back, xback, yback, BACK_TRI_RIGHT)
-  rot_card(ctx_back, xback, yback)
-  draw_outline(ctx_back, xback, yback)
-  draw_back_text(ctx_back, GAME_NAME, xback, yback)
-
-  # Front Left Side
-  triangle(ctx, xi, yi, NUMBER_COLORS[left])
-  draw_text(ctx, True, lefts, xi, yi)
-  draw_box(ctx, xi, yi)
-  draw_text(ctx, False, rights, xi, yi)
-
-  rot_card(ctx, xi, yi)
-
-  # Front Rigth Side
-  triangle(ctx, xi, yi, NUMBER_COLORS[right])
-  draw_text(ctx, True, rights, xi, yi)
-  draw_box(ctx, xi, yi)
-  draw_text(ctx, False, lefts, xi, yi)
-
-  rot_card(ctx, xi, yi)
-
-  draw_outline(ctx, xi, yi)
-
-  if xi < (MAX_COLS - 1):
-    xi += 1
-  elif yi < (MAX_ROWS - 1):
-    xi = 0
-    yi += 1
-  else:
-    xi = 0
-    yi = 0
-
-surface.finish()
-surface_back.finish()
-
-# Finally, combine pages of PDF into one
-combined = PdfFileMerger()
-for i in range(0, file_idx):
-  combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
-  os.remove('Scout-{}.pdf'.format(i))
-  combined.append(PdfFileReader('Scout-Back{}.pdf'.format(i), 'rb'))
-  os.remove('Scout-Back{}.pdf'.format(i))
-combined.write("Scout.pdf")
+  # Finally, combine pages of PDF into one
+  combined = PdfFileMerger()
+  for i in range(0, file_idx):
+    combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
+    os.remove('Scout-{}.pdf'.format(i))
+    combined.append(PdfFileReader('Scout-Back{}.pdf'.format(i), 'rb'))
+    os.remove('Scout-Back{}.pdf'.format(i))
+  combined.write("Scout.pdf")
