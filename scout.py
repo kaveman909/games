@@ -5,12 +5,18 @@ from math import pi, floor
 import cairo
 from PyPDF2 import PdfFileMerger, PdfFileReader
 import os
- 
+
+
 class Color:
-  def __init__(self, r, g, b):
+  def __init__(self, r, g, b, a=1):
     self.r = nrgb(r)
     self.g = nrgb(g)
     self.b = nrgb(b)
+    self.a = a
+
+
+def set_color(ctx: cairo.Context, color):
+  ctx.set_source_rgba(color.r, color.g, color.b, color.a)
 
 
 def ppi(inches):
@@ -20,7 +26,10 @@ def ppi(inches):
 def nrgb(raw: int):
   return float(raw) / 255
 
+
 svg = False
+
+GAME_NAME = "Scout"
 
 FONT = "gill sans"
 # FONT = "helvetica neue"
@@ -44,6 +53,7 @@ MAJOR_EXTRA_SHIFT = 8
 MINOR_EXTRA_SHIFT = 6
 
 MINOR_FONT_SIZE = 25
+BACK_FONT_SIZE = 65
 
 BOX_EXTRA_MARGIN = 12
 BOX_RADIUS = (MINOR_FONT_SIZE + 10) / 2
@@ -67,17 +77,25 @@ NUMBER_COLORS = [Color(77, 103, 190),
                  Color(255, 190, 30),
                  Color(244, 117, 1),
                  Color(254, 61, 82)]
+CARD_BACK_COLOR = Color(0, 0, 0)
+CUTS_COLOR = Color(0, 0, 0)
+
+BACK_TRI_LEFT = Color(67, 0, 149)
+BACK_TRI_RIGHT = Color(240, 133, 1)
+BACK_FONT_COLOR = Color(241, 223, 1)
 
 
-def rot_card(ctx, xi, yi):
+def rot_card(ctx: cairo.Context, xi, yi, angle=pi, inv=False):
+  if inv:
+    angle = -angle
   xshift = MARGIN_WIDTH + CARD_WIDTH/2 + CARD_WIDTH * xi
   yshift = yinv(MARGIN_HEIGHT + CARD_HEIGHT/2 + CARD_HEIGHT * yi)
   ctx.translate(xshift, yshift)
-  ctx.rotate(pi)
+  ctx.rotate(angle)
   ctx.translate(-xshift, -yshift)
 
 
-def triangle(ctx: cairo.Context, xi: int, yi: int, color: Color, alpha=1):
+def triangle(ctx: cairo.Context, xi: int, yi: int, color: Color):
   xstart = MARGIN_WIDTH + xi*CARD_WIDTH
   ystart = yinv(MARGIN_HEIGHT + yi*CARD_HEIGHT)
   ctx.move_to(xstart, ystart)
@@ -85,7 +103,7 @@ def triangle(ctx: cairo.Context, xi: int, yi: int, color: Color, alpha=1):
                    CARD_WIDTH * -0.25, CARD_HEIGHT * -0.8, CARD_WIDTH, -CARD_HEIGHT)
   ctx.rel_line_to(-CARD_WIDTH, 0)
   ctx.close_path()
-  ctx.set_source_rgba(color.r, color.g, color.b, alpha)
+  set_color(ctx, color)
   ctx.fill()
 
 
@@ -122,17 +140,44 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
   ctx.text_path(s)
 
   # set text fill color, fill in the text, preserve so we can draw the outline
-  ctx.set_source_rgb(color.r, color.g, color.b)
+  set_color(ctx, color)
   ctx.fill_preserve()
   # Draw thin white outline around text
   ctx.set_line_width(line_width)
-  ctx.set_source_rgb(1, 1, 1)
+  set_color(ctx, OUTLINE_COLOR)
 
   ctx.stroke()
 
 
+def draw_back_text(ctx: cairo.Context, s: str, xi: int, yi: int):
+
+  ctx.select_font_face(FONT, cairo.FONT_SLANT_NORMAL,
+                       cairo.FONT_WEIGHT_BOLD)
+  ctx.set_font_size(BACK_FONT_SIZE)
+
+  xshift = MARGIN_WIDTH + \
+      (CARD_WIDTH - ctx.text_extents(s).height)/2 + CARD_WIDTH * xi
+  yshift = yinv(MARGIN_HEIGHT + (CARD_HEIGHT +
+                ctx.text_extents(s).width)/2 + CARD_HEIGHT * yi)
+  ctx.translate(xshift, yshift)
+  ctx.rotate(pi/2)
+
+  ctx.text_path(s)
+  # set text fill color, fill in the text, preserve so we can draw the outline
+  set_color(ctx, BACK_FONT_COLOR)
+  ctx.fill_preserve()
+  # Draw thin white outline around text
+  ctx.set_line_width(2)
+  set_color(ctx, OUTLINE_COLOR)
+
+  ctx.stroke()
+
+  ctx.rotate(-pi/2)
+  ctx.translate(-xshift, -yshift)
+
+
 def draw_box(ctx: cairo.Context, xi: int, yi: int):
-  ctx.set_source_rgba(BOX_COLOR.r, BOX_COLOR.g, BOX_COLOR.b)
+  set_color(ctx, BOX_COLOR)
   ctx.set_line_width(0)
   ctx.arc(MARGIN_WIDTH + BOX_RADIUS + BOX_EXTRA_MARGIN + CARD_WIDTH*xi, yinv(MARGIN_HEIGHT +
           CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS - 6), BOX_RADIUS, 3*pi/2, pi/2)
@@ -144,19 +189,23 @@ def draw_box(ctx: cairo.Context, xi: int, yi: int):
   ctx.stroke()
 
 
-def draw_outline(ctx: cairo.Context, xi: int, yi: int):
-  ctx.set_source_rgba(OUTLINE_COLOR.r, OUTLINE_COLOR.g, OUTLINE_COLOR.b)
-  ctx.set_line_width(CARD_OUTLINE_WIDTH)
+def draw_outline(ctx: cairo.Context, xi: int, yi: int, fill=False):
 
   ctx.rectangle(MARGIN_WIDTH + CARD_WIDTH*xi + CARD_OUTLINE_WIDTH/2 - 1, yinv(
       MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - CARD_OUTLINE_WIDTH/2 + 1), CARD_WIDTH - CARD_OUTLINE_WIDTH/2 + 1, CARD_HEIGHT - CARD_OUTLINE_WIDTH/2 + 1)
 
+  if fill:
+    set_color(ctx, CARD_BACK_COLOR)
+    ctx.fill_preserve()
+
+  set_color(ctx, OUTLINE_COLOR)
+  ctx.set_line_width(CARD_OUTLINE_WIDTH)
   ctx.set_line_join(cairo.LineJoin.MITER)
   ctx.stroke()
 
 
 def draw_cuts(ctx: cairo.Context):
-  ctx.set_source_rgba(0, 0, 0)
+  set_color(ctx, CUTS_COLOR)
   ctx.set_line_width(1)
 
   for i in range(MAX_ROWS + 1):
@@ -184,21 +233,36 @@ def draw_cuts(ctx: cairo.Context):
 xi = 0
 yi = 0
 file_idx = 0
+
 for left, right in itertools.combinations(range(0, 10), 2):
 
   if (xi == 0 and yi == 0):
     if svg:
-      surface = cairo.SVGSurface('Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+      surface = cairo.SVGSurface(
+          'Scout-{}.svg'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
     else:
-      surface = cairo.PDFSurface('Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+      surface = cairo.PDFSurface(
+          'Scout-{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
+      surface_back = cairo.PDFSurface(
+          'Scout-Back{}.pdf'.format(file_idx), PAPER_WIDTH, PAPER_HEIGHT)
     file_idx += 1
     ctx = cairo.Context(surface)
+    ctx_back = cairo.Context(surface_back)
     draw_cuts(ctx)
+    draw_cuts(ctx_back)
 
   lefts = str(left)
   rights = str(right)
 
-  # Left side of card
+  # Back Side
+  triangle(ctx_back, xi, yi, BACK_TRI_LEFT)
+  rot_card(ctx_back, xi, yi)
+  triangle(ctx_back, xi, yi, BACK_TRI_RIGHT)
+  rot_card(ctx_back, xi, yi)
+  draw_outline(ctx_back, xi, yi)
+  draw_back_text(ctx_back, GAME_NAME, xi, yi)
+
+  # Front Left Side
   triangle(ctx, xi, yi, NUMBER_COLORS[left])
   draw_text(ctx, True, lefts, xi, yi)
   draw_box(ctx, xi, yi)
@@ -206,7 +270,7 @@ for left, right in itertools.combinations(range(0, 10), 2):
 
   rot_card(ctx, xi, yi)
 
-  # Rigth Side
+  # Front Rigth Side
   triangle(ctx, xi, yi, NUMBER_COLORS[right])
   draw_text(ctx, True, rights, xi, yi)
   draw_box(ctx, xi, yi)
@@ -226,10 +290,13 @@ for left, right in itertools.combinations(range(0, 10), 2):
     yi = 0
 
 surface.finish()
+surface_back.finish()
 
 # Finally, combine pages of PDF into one
 combined = PdfFileMerger()
 for i in range(0, file_idx):
-    combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
-    os.remove('Scout-{}.pdf'.format(i))
+  combined.append(PdfFileReader('Scout-{}.pdf'.format(i), 'rb'))
+  os.remove('Scout-{}.pdf'.format(i))
+  combined.append(PdfFileReader('Scout-Back{}.pdf'.format(i), 'rb'))
+  os.remove('Scout-Back{}.pdf'.format(i))
 combined.write("Scout.pdf")
