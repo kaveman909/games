@@ -42,7 +42,7 @@ def get_adjacent(cards: list[Card], position):
 
 
 def cards_of_a_color(cards: list[Card], color: Color):
-  return sum([1 for card in cards if card.color == color])
+  return sum(1 for card in cards if card.color == color)
 
 
 def display_arrangement(cards: list[Card], points):
