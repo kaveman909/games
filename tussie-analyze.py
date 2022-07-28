@@ -79,12 +79,11 @@ def analyze_arrangement(arrangement: list[Card], length):
         if points > max_points:
           max_points = points
           max_arrangement = arrangement
-      all_points.append(max_points)
-      # display_arrangement(max_arrangement, max_points)
     except ValueError:
-      points = calculate_points(arrangement)
-      all_points.append(points)
-      # display_arrangement(arrangement, points)
+      max_points = calculate_points(arrangement)
+      max_arrangement = arrangement
+    all_points.append(max_points)
+    display_arrangement(max_arrangement, max_points)
 
 
 if __name__ == "__main__":
