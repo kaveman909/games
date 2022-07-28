@@ -8,6 +8,9 @@ import statistics
 import matplotlib.pyplot as plt
 
 
+LONGEST_NAME_FLOWER = 13
+LONGEST_NAME_COLOR = 6
+
 @unique
 class Color(Enum):
   WHITE = auto()
@@ -83,7 +86,26 @@ def analyze_arrangement(arrangement: list[Card], length):
       max_points = calculate_points(arrangement)
       max_arrangement = arrangement
     all_points.append(max_points)
+    all_arrangements.append([max_arrangement, max_points])
     display_arrangement(max_arrangement, max_points)
+
+
+def update_stats(stats, field_name, points):
+  try:
+    stats[field_name][0] += 1
+    stats[field_name][1] += points
+    stats[field_name][2] = max(stats[field_name][2], points)
+    stats[field_name][3] = min(stats[field_name][3], points)
+
+  except KeyError:
+    stats[field_name] = [1, points, points, points]
+
+def compute_and_print_stats(stats, longest_name):
+  list_stats = list(stats.items())
+  list_stats.sort(key=lambda stat: stat[1][1] / stat[1][0])
+
+  for field_name, stats in list_stats:
+    print("{}:\t{} max\t{} min\t{:.2f} avg".format(field_name + " "*(longest_name - len(field_name)), stats[2], stats[3], stats[1]/stats[0]))
 
 
 if __name__ == "__main__":
@@ -117,7 +139,7 @@ if __name__ == "__main__":
       Card("Orchid", Color.WHITE, 1, no_scoring),
       Card("Pink Larkspur", Color.PINK, 0, no_scoring),
       Card("Snapdragon", Color.PURPLE, 1, no_scoring),
-      Card("Marigold", Color.YELLOW, 2, no_scoring)
+      Card("Marigold", Color.YELLOW, 3, no_scoring)
   ]
 
   # NOTE: this assumes that "Marigold" is the last Card in the list.
@@ -136,17 +158,26 @@ if __name__ == "__main__":
   
   # Data plotting, analysis 
 
-  print(max(all_points), min(all_points), statistics.mean(all_points), statistics.stdev(all_points))
-  
+  flower_stats = {}
+  color_stats = {}
+  for arrangement in all_arrangements:
+    points = arrangement[1]
+    for flower in arrangement[0]:
+      update_stats(flower_stats, flower.name, points)
+      update_stats(color_stats, flower.color.name, points)
+
+  compute_and_print_stats(flower_stats, LONGEST_NAME_FLOWER)
+  compute_and_print_stats(color_stats, LONGEST_NAME_COLOR)
+
   fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
   counts, edges, bars = axs.hist(all_points, bins=14)
   
   sum_counts = 0
   sum_all = sum(counts)
-  print(sum_all)
+
   for i, count in enumerate(counts):
     sum_counts += count
     print("{} count: {} {:.2f}%".format(i+1, count, sum_counts/sum_all*100))
 
-  # plt.bar_label(bars)
-  # plt.show()
+  plt.bar_label(bars)
+  plt.show()
