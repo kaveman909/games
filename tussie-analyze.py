@@ -2,9 +2,6 @@
 
 from enum import Enum, auto, unique
 import itertools
-from multiprocessing import allow_connection_pickling
-from multiprocessing.connection import wait
-import statistics
 import matplotlib.pyplot as plt
 
 
@@ -116,29 +113,28 @@ def compute_and_print_stats(stats, longest_name):
 if __name__ == "__main__":
   cards = [
       Card("Hyacinth", Color.PURPLE, 0, lambda cards, _: 3 if sum(
-          [card.hearts for card in cards]) == 0 else 0),
+          card.hearts for card in cards) == 0 else 0),
       Card("Honeysuckle", Color.YELLOW, 1, lambda cards, position: sum(
-          [not card.keepsake for card in get_adjacent(cards, position)])),
+          not card.keepsake for card in get_adjacent(cards, position))),
       Card("Forget-Me-Not", Color.PURPLE, 1, lambda cards,
-           position: sum([card.hearts for card in get_adjacent(cards, position)])),
+           position: sum(card.hearts for card in get_adjacent(cards, position))),
       Card("Carnation", Color.YELLOW, 0, lambda cards, _: len(
           {card.color for card in cards})),
       Card("Peony", Color.PINK, 1, lambda cards, _: 2 if sum(
-          [not card.keepsake for card in cards]) == 2 else 0),
-      Card("Red Rose", Color.RED, 0, lambda cards, _: sum(
-          [card.hearts for card in cards])),
-      Card("Gardenia", Color.WHITE, 0, lambda cards, _: sum(
-          [card.keepsake for card in cards])),
-      Card("Amaryllis", Color.RED, 0, lambda cards, _: sum(
-          [not card.keepsake for card in cards])),
+          not card.keepsake for card in cards) == 2 else 0),
+      Card("Red Rose", Color.RED, 0, lambda cards,
+           _: sum(card.hearts for card in cards)),
+      Card("Gardenia", Color.WHITE, 0, lambda cards,
+           _: sum(card.keepsake for card in cards)),
+      Card("Amaryllis", Color.RED, 0, lambda cards,
+           _: sum(not card.keepsake for card in cards)),
       Card("Pink Rose", Color.PINK, 0,
            lambda cards, _: cards_of_a_color(cards, Color.PINK)),
       Card("Red Tupid", Color.RED, 0,
            lambda cards, _: cards_of_a_color(cards, Color.RED)),
       Card("Violet", Color.PURPLE, 0,
            lambda cards, _: cards_of_a_color(cards, Color.PURPLE)),
-      Card("Daisy", Color.WHITE, 0, lambda cards, _: sum(
-          [1 for card in cards if card.hearts == 0]) - 1),
+      Card("Daisy", Color.WHITE, 0, lambda cards, _: sum(1 for card in cards if card.hearts == 0) - 1),
       Card("Camellia", Color.RED, 1, no_scoring),
       Card("Phlox", Color.PINK, 2, no_scoring),
       Card("Orchid", Color.WHITE, 1, no_scoring),
