@@ -134,7 +134,8 @@ if __name__ == "__main__":
            lambda cards, _: cards_of_a_color(cards, Color.RED)),
       Card("Violet", Color.PURPLE, 0,
            lambda cards, _: cards_of_a_color(cards, Color.PURPLE)),
-      Card("Daisy", Color.WHITE, 0, lambda cards, _: sum(1 for card in cards if card.hearts == 0) - 1),
+      Card("Daisy", Color.WHITE, 0, lambda cards, _: sum(
+          1 for card in cards if card.hearts == 0) - 1),
       Card("Camellia", Color.RED, 1, no_scoring),
       Card("Phlox", Color.PINK, 2, no_scoring),
       Card("Orchid", Color.WHITE, 1, no_scoring),
