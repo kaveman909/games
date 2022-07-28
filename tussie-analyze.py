@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 LONGEST_NAME_FLOWER = 13
 LONGEST_NAME_COLOR = 6
 
+
 @unique
 class Color(Enum):
   WHITE = auto()
@@ -64,8 +65,10 @@ def calculate_points(cards: list[Card]):
   points += sum(card.scoring(cards, card.position) for card in cards)
   return points
 
+
 all_points = []
 all_arrangements = []
+
 
 def analyze_arrangement(arrangement: list[Card], length):
   for keepsake_map in itertools.product([False, True], repeat=length):
@@ -100,12 +103,14 @@ def update_stats(stats, field_name, points):
   except KeyError:
     stats[field_name] = [1, points, points, points]
 
+
 def compute_and_print_stats(stats, longest_name):
   list_stats = list(stats.items())
   list_stats.sort(key=lambda stat: stat[1][1] / stat[1][0])
 
   for field_name, stats in list_stats:
-    print("{}:\t{} max\t{} min\t{:.2f} avg".format(field_name + " "*(longest_name - len(field_name)), stats[2], stats[3], stats[1]/stats[0]))
+    print("{}:\t{} max\t{} min\t{:.2f} avg".format(field_name + " " *
+          (longest_name - len(field_name)), stats[2], stats[3], stats[1]/stats[0]))
 
 
 if __name__ == "__main__":
@@ -155,8 +160,7 @@ if __name__ == "__main__":
     arrangement = list(tup_arrangement)
     analyze_arrangement(arrangement, 4)
 
-  
-  # Data plotting, analysis 
+  # Data plotting, analysis
 
   flower_stats = {}
   color_stats = {}
@@ -171,7 +175,7 @@ if __name__ == "__main__":
 
   fig, axs = plt.subplots(1, 1, sharey=True, tight_layout=True)
   counts, edges, bars = axs.hist(all_points, bins=14)
-  
+
   sum_counts = 0
   sum_all = sum(counts)
 
