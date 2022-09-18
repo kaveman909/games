@@ -10,7 +10,7 @@ from email.message import EmailMessage
 import schedule
 import time
 import os
-from datetime import datetime
+import keyring
 
 REMOVE_RETRY = 3
 
@@ -64,10 +64,10 @@ class Crawler:
   def send_email(self, urls_new, urls_removed):
     # set your email and password
     # please use App Password
-    email_address = "xxx@gmail.com"
-    email_password = "xxx"
-    send_addr_text = "xxx@sms.clicksend.com"
-    send_addr_email = "xxx@gmail.com"
+    email_address = keyring.get_password('system', 'from_email')
+    email_password = keyring.get_password('system', 'from_email_pw')
+    send_addr_text = keyring.get_password('system', 'send_text')
+    send_addr_email = keyring.get_password('system', 'send_email')
 
     # always create email
     msg = EmailMessage()
