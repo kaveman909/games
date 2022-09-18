@@ -1,3 +1,9 @@
+# Custom files
+db.txt
+tussie-mussie-text-data.txt
+
+# From template:
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

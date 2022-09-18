@@ -34,6 +34,7 @@ def combinations_two(start, end, contain_self=False, repeat=1):
       for j in range(j_start, end):
         yield (i, j)
 
+
 svg = False
 blank_character = '0'
 
@@ -54,8 +55,9 @@ MARGIN_HEIGHT = ppi(0.5)
 MAX_COLS = floor((PAPER_WIDTH - MARGIN_WIDTH*2)/CARD_WIDTH)
 MAX_ROWS = floor((PAPER_HEIGHT - MARGIN_HEIGHT*2)/CARD_HEIGHT)
 
-MAJOR_FONT_SIZE = 25
-MAJOR_EXTRA_SHIFT = 0
+MAJOR_FONT_SIZE = 70
+MAJOR_EXTRA_SHIFT = 20
+MAJOR_EXTRA_SHIFT_Y = 45
 MINOR_EXTRA_SHIFT = 16
 
 MINOR_FONT_SIZE = 45
@@ -71,7 +73,7 @@ def yinv(yin: int):
   return PAPER_HEIGHT - yin
 
 
-MAIN_TEXT_COLOR = Color(5, 45, 74)
+MAIN_TEXT_COLOR = Color(5, 45, 74, 0.25)
 BOX_COLOR = Color(5, 26, 52)
 OUTLINE_COLOR = Color(255, 255, 255)
 NUMBER_COLORS = [Color(239, 239, 239),
@@ -134,7 +136,7 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     extra_shift_minor_y = 0
 
   if s == '1':
-    extra_shift_major = -4
+    extra_shift_major = MAJOR_EXTRA_SHIFT - 20
     extra_shift_minor = MINOR_EXTRA_SHIFT
   else:
     extra_shift_major = MAJOR_EXTRA_SHIFT
@@ -145,13 +147,15 @@ def draw_text(ctx: cairo.Context, main: bool, s, xi: int, yi: int):
     ctx.set_font_size(font_size)
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH / 2) - \
         (ctx.text_extents(s).width / 1.5) + extra_shift_major + CARD_WIDTH*xi
-    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) - MAJOR_FONT_SIZE - BOX_RADIUS*2 - 12)
-    line_width = 1
+    ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) -
+              MAJOR_FONT_SIZE - BOX_RADIUS*2 - MAJOR_EXTRA_SHIFT_Y)
+    line_width = 0
   else:
     color = NUMBER_COLORS[int(s_orig, 16)]
     font_size = MINOR_FONT_SIZE
     ctx.set_font_size(font_size)
-    adj = BOX_RADIUS - (2*BOX_RADIUS - ctx.text_extents(s).height) / 2 - extra_shift_minor_y
+    adj = BOX_RADIUS - \
+        (2*BOX_RADIUS - ctx.text_extents(s).height) / 2 - extra_shift_minor_y
     xm = MARGIN_WIDTH + (BOX_TOTAL_WIDTH) - 16 - \
         ctx.text_extents(s).width + CARD_WIDTH*xi - extra_shift_minor
     ym = yinv(MARGIN_HEIGHT + CARD_HEIGHT*(yi + 1) -
@@ -179,11 +183,12 @@ def draw_back_text(ctx: cairo.Context, s: str, xi: int, yi: int):
   ctx.set_font_size(BACK_FONT_SIZE)
 
   xshift = MARGIN_WIDTH + \
-      (CARD_WIDTH + ctx.text_extents(s).height)/2 - CARD_WIDTH/2 + CARD_WIDTH * xi
+      (CARD_WIDTH + ctx.text_extents(s).height) / \
+      2 - CARD_WIDTH/2 + CARD_WIDTH * xi
   yshift = yinv(MARGIN_HEIGHT + (CARD_HEIGHT +
                 ctx.text_extents(s).width)/2 - 20 + CARD_HEIGHT * yi)
   ctx.translate(xshift, yshift)
-  ctx.rotate(atan2(CARD_HEIGHT,CARD_WIDTH))
+  ctx.rotate(atan2(CARD_HEIGHT, CARD_WIDTH))
 
   ctx.text_path(s)
   # set text fill color, fill in the text, preserve so we can draw the outline

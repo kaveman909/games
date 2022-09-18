@@ -87,7 +87,7 @@ def analyze_arrangement(arrangement: list[Card], length):
       max_arrangement = arrangement
     all_points.append(max_points)
     all_arrangements.append([max_arrangement, max_points])
-    display_arrangement(max_arrangement, max_points)
+    # display_arrangement(max_arrangement, max_points)
 
 
 def update_stats(stats, field_name, points):
