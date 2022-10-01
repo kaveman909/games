@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/python3
+#!/opt/homebrew/opt/python@3.9/libexec/bin/python3
 
 from enum import Enum, auto, unique
 import itertools
@@ -67,7 +67,8 @@ all_points = []
 all_arrangements = []
 
 
-def analyze_arrangement(arrangement: list[Card], length):
+def analyze_arrangement(arrangement: list[Card]):
+  length = len(arrangement)
   for keepsake_map in itertools.product([False, True], repeat=length):
     for i in range(length):
       arrangement[i].position = i
@@ -151,11 +152,11 @@ if __name__ == "__main__":
     lcomb.append(cards[-1])
     for tup_arrangement in itertools.permutations(lcomb):
       arrangement = list(tup_arrangement)
-      analyze_arrangement(arrangement, 3)
+      analyze_arrangement(arrangement)
 
   for tup_arrangement in itertools.permutations(cards[0:-1], 4):
     arrangement = list(tup_arrangement)
-    analyze_arrangement(arrangement, 4)
+    analyze_arrangement(arrangement)
 
   # Data plotting, analysis
 
