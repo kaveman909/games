@@ -1,0 +1,100 @@
+#!/opt/homebrew/bin/python3
+
+from termcolor import colored
+import random
+
+class Piece:
+  def __init__(self, _name, _shape, _color='white'):
+    self.name = _name
+    self.shape = _shape
+    self.color = _color
+
+colors = ['red', 'blue', 'yellow']
+
+color_shapes = [
+'''
+##
+##
+''',
+'''
+###
+# #
+''',
+'''
+##
+ ##
+''',
+'''
+ # 
+###
+''',
+'''
+#
+##
+''',
+'''
+# 
+###
+''',
+'''
+####
+''',
+'''
+##
+'''
+]
+
+church_shapes = [
+'''
+ #
+###
+ #
+''',
+'''
+  #
+###
+''',
+'''
+ ##
+##
+''',
+'''
+[special]
+'''
+]
+
+cog_shapes = [
+'''
+###
+''',
+'''
+###
+ #
+ #
+'''
+]
+
+# build the list of pieces
+pieces = []
+# add colored pieces
+for color in colors:
+  for shape in color_shapes:
+    pieces.append(Piece('Normal', shape, color))
+# add churches
+for church in church_shapes:
+  pieces.append(Piece('Church', church, 'magenta'))
+# add 'remove piece' special card
+pieces.append(Piece('Special', '\n[remove next]\n', 'green'))
+# add cogs
+for cog in cog_shapes:
+  pieces.append(Piece('Cog', cog, 'blue'))
+
+# sequence = list(range(0, len(pieces)))
+random.shuffle(pieces)
+
+count = 1
+for piece in pieces:
+  input("Press [enter] for next card ({})".format(count))
+  count += 1
+  print("\n{}".format(piece.name))
+  print(colored(piece.shape, piece.color))
