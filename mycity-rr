@@ -1,0 +1,77 @@
+#!/opt/homebrew/bin/python3
+
+import secrets
+
+patterns = ['🟦', '❌', '🥖']
+
+dice = [[
+# left die; dot on the RIGHT side
+'''.#
+..
+''',
+
+'''..
+..
+''',
+
+'''##
+..
+''',
+
+'''⛪️⛪️
+⛪️⛪️
+''',
+
+'''.#
+.#
+''',
+
+'''.#
+.#
+'''
+],
+
+# right die; dot on the LEFT side
+[
+'''#.
+..
+''',
+
+'''#.
+#.
+''',
+
+'''#.
+..
+''',
+
+'''#.
+#.
+''',
+
+'''##
+..
+''',
+
+'''##
+.#
+'''
+]]
+
+while True:
+  input('Press [enter] for next dice roll!')
+  patterns_idx = secrets.randbelow(3)
+  
+  top = ''
+  bot = ''
+  for die in dice:
+    die_idx = secrets.randbelow(6)
+    die_arr = die[die_idx].splitlines()
+    top += die_arr[0]
+    bot += die_arr[1]
+
+  for side in [top, bot]:
+    side = side.replace('.', '⬛️')
+    side = side.replace('#', patterns[patterns_idx])
+    print(side)
+  print()
